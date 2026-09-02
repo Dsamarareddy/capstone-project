@@ -38,6 +38,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Local AI coding assistant tool state (not project content)
+.claude/
+
 # Presentation exports (generated, not source)
 presentation/*.pptx
 presentation/*.pdf
