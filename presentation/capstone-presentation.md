@@ -181,8 +181,13 @@ Full Context / Problem / Decision / Alternatives / Trade-offs / Consequences / R
 - ✅ All GitHub Actions workflow YAML parsed successfully (Python `yaml.safe_load`)
 - ✅ Manual cross-module consistency review (variable/output names match across every module boundary)
 - ✅ Real, incremental local git history — no AI prompts or chat history committed
-- 🔜 `terraform validate` / `docker compose up` / `./scripts/security-scan.ps1` — documented exact commands
-  for the reviewer to run (see root `README.md` "Live Demo" section)
+- ✅ **Live demo actually run** via Podman: built the real Dockerfile, ran it against a real Postgres
+  container, exercised the full CRUD lifecycle over HTTP end-to-end
+- ✅ **Security scan actually run** via Podman: Gitleaks clean (0 findings); Checkov triaged from 40 failed
+  checks down to **0 failed / 164 passed / 24 reasoned skips** (real fixes + documented trade-offs — see
+  ADR-0004); Trivy blocked by this network's TLS interception (documented, not worked around)
+- 🔜 `terraform validate` — Terraform wasn't resolvable on this machine's PATH; documented exact command in
+  root `README.md` for the reviewer to run once it is
 
 ---
 
