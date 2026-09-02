@@ -1,0 +1,5 @@
+aws_region           = "us-east-1"
+app_name             = "ims"
+environment_name     = "dev"
+container_image_tag  = "latest"
+container_port       = 3000
