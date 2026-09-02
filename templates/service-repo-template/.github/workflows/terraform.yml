@@ -1,0 +1,19 @@
+name: Terraform Validate
+
+# TODO(platform-owner): replace <org>/group1-advanced@main below with a pinned tag once available.
+
+on:
+  push:
+    branches: [main, master]
+    paths: ["infrastructure/**"]
+  pull_request:
+    paths: ["infrastructure/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    uses: <org>/group1-advanced/.github/workflows/reusable-terraform.yml@main
+    with:
+      working_dir: infrastructure

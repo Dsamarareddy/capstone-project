@@ -1,0 +1,17 @@
+{
+  "name": "TODO-service-name",
+  "version": "0.1.0",
+  "description": "TODO(new-service): describe what this service does",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "lint": "echo \"TODO(new-service): add a linter\" && exit 0",
+    "test": "echo \"TODO(new-service): add tests\" && exit 0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

@@ -1,0 +1,28 @@
+name: CI
+
+# TODO(platform-owner): replace <org>/group1-advanced@main below with a pinned tag
+# (e.g. @workflows/v1.0.0) once the platform repo has a release tag consuming teams can rely on.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request: {}
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: <org>/group1-advanced/.github/workflows/reusable-ci.yml@main
+    with:
+      app_dir: app # TODO(new-service): change if your app lives elsewhere
+      node_version: "20"
+      image_name: TODO-service-name # TODO(new-service): set to your service name
+
+  security-scan:
+    needs: ci
+    uses: <org>/group1-advanced/.github/workflows/reusable-security-scan.yml@main
+    with:
+      app_dir: app # TODO(new-service): change if your app lives elsewhere
+      image_name: TODO-service-name # TODO(new-service): set to your service name
+      terraform_dir: infrastructure
