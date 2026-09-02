@@ -1,0 +1,13 @@
+# See docs/ai-specifications/governance-spec.md for the policy this file implements.
+# Platform-owned surfaces require platform-team review; application code is owned by the app team.
+# TODO(platform-owner): @platform-team / @ims-team are placeholders - replace with real GitHub team
+# handles or usernames once this repository is hosted on GitHub (CODEOWNERS only takes effect there).
+
+/infrastructure/           @platform-team
+/.github/workflows/        @platform-team
+/templates/                @platform-team
+/scripts/                  @platform-team
+/docs/ai-specifications/   @platform-team
+/docs/engineering-decisions/ @platform-team
+
+/app/ims/                  @ims-team
