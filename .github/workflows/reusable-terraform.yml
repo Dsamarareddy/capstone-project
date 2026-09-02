@@ -1,0 +1,44 @@
+name: Reusable - Terraform Validate
+
+on:
+  workflow_call:
+    inputs:
+      working_dir:
+        description: "Terraform directory to validate (a module or an environment)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: fmt / validate / checkov
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_dir }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.5"
+
+      - name: terraform fmt (check only)
+        run: terraform fmt -check -recursive
+
+      - name: terraform init (no backend - no cloud account in this capstone)
+        run: terraform init -backend=false
+
+      - name: terraform validate
+        run: terraform validate
+
+      - name: Checkov static analysis
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: ${{ inputs.working_dir }}
+          framework: terraform
+          soft_fail: false

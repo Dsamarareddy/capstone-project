@@ -1,0 +1,55 @@
+name: Infrastructure - Terraform Validate
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "infrastructure/**"
+      - ".github/workflows/terraform.yml"
+      - ".github/workflows/reusable-terraform.yml"
+  pull_request:
+    paths:
+      - "infrastructure/**"
+      - ".github/workflows/terraform.yml"
+      - ".github/workflows/reusable-terraform.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  networking:
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      working_dir: infrastructure/modules/networking
+
+  ecr:
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      working_dir: infrastructure/modules/ecr
+
+  iam-app-role:
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      working_dir: infrastructure/modules/iam-app-role
+
+  rds-postgres:
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      working_dir: infrastructure/modules/rds-postgres
+
+  s3-bucket:
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      working_dir: infrastructure/modules/s3-bucket
+
+  ecs-fargate-service:
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      working_dir: infrastructure/modules/ecs-fargate-service
+
+  dev-environment:
+    needs:
+      [networking, ecr, iam-app-role, rds-postgres, s3-bucket, ecs-fargate-service]
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      working_dir: infrastructure/environments/dev

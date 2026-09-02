@@ -1,0 +1,66 @@
+name: Reusable - CI (lint, test, build)
+
+on:
+  workflow_call:
+    inputs:
+      app_dir:
+        description: "Path to the application directory (e.g. app/ims)"
+        required: true
+        type: string
+      node_version:
+        description: "Node.js version to use"
+        required: false
+        type: string
+        default: "20"
+      image_name:
+        description: "Docker image name to tag the built image with"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test-build:
+    name: Lint, test, and build image
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.app_dir }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: npm
+          cache-dependency-path: ${{ inputs.app_dir }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Test
+        run: npm test
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.app_dir }}
+          push: false
+          tags: ${{ inputs.image_name }}:ci-${{ github.sha }}
+          outputs: type=docker,dest=/tmp/${{ inputs.image_name }}-image.tar
+
+      - name: Upload built image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.image_name }}-image
+          path: /tmp/${{ inputs.image_name }}-image.tar
+          retention-days: 3

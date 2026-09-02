@@ -1,0 +1,37 @@
+name: IMS - CI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "app/ims/**"
+      - ".github/workflows/ci.yml"
+      - ".github/workflows/reusable-ci.yml"
+      - ".github/workflows/reusable-security-scan.yml"
+  pull_request:
+    paths:
+      - "app/ims/**"
+      - ".github/workflows/ci.yml"
+      - ".github/workflows/reusable-ci.yml"
+      - ".github/workflows/reusable-security-scan.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/reusable-ci.yml
+    with:
+      app_dir: app/ims
+      node_version: "20"
+      image_name: ims
+
+  security-scan:
+    name: Security Scan
+    needs: ci
+    uses: ./.github/workflows/reusable-security-scan.yml
+    with:
+      app_dir: app/ims
+      image_name: ims
+      terraform_dir: ""
