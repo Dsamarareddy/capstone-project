@@ -17,12 +17,12 @@ infrastructure, eliminating duplicate, drifted, hand-rolled Terraform per applic
 
 | Module | Purpose | Key inputs | Key outputs |
 |---|---|---|---|
-| `networking` | VPC, public/private subnets across 2 AZs, IGW, route tables, security groups | `vpc_cidr`, `az_count`, `name` | `vpc_id`, `private_subnet_ids`, `public_subnet_ids`, `app_security_group_id` |
+| `networking` | VPC, public/private subnets across 2 AZs, IGW, locked-down default SG, VPC Flow Logs | `vpc_cidr`, `az_count`, `name` | `vpc_id`, `private_subnet_ids`, `public_subnet_ids` |
 | `ecr` | Private container registry repo with image scanning + lifecycle policy | `name`, `image_tag_mutability` | `repository_url`, `repository_arn` |
 | `iam-app-role` | Least-privilege execution + task role for a containerized service | `name`, `allowed_actions`, `allowed_resources` | `execution_role_arn`, `task_role_arn` |
-| `rds-postgres` | Single-AZ (dev) / Multi-AZ (prod-capable) Postgres instance in private subnets | `identifier`, `subnet_ids`, `vpc_security_group_ids`, `instance_class`, `allocated_storage`, `engine_version` | `endpoint`, `port`, `db_name`, `secret_arn` |
-| `s3-bucket` | Generic private bucket: encryption at rest, versioning, public-access block | `bucket_name`, `versioning_enabled` | `bucket_id`, `bucket_arn` |
-| `ecs-fargate-service` | ECS cluster + Fargate task definition + service + ALB for one app | `name`, `image_url`, `container_port`, `vpc_id`, `subnet_ids`, `execution_role_arn`, `task_role_arn`, `desired_count` | `alb_dns_name`, `service_name`, `cluster_name` |
+| `rds-postgres` | Single-AZ (dev) / Multi-AZ (prod-capable) Postgres instance in private subnets, own security group, Enhanced Monitoring, Performance Insights, DDL logging | `identifier`, `vpc_id`, `subnet_ids`, `allowed_security_group_ids`, `instance_class`, `allocated_storage`, `engine_version`, `multi_az`, `deletion_protection` | `endpoint`, `port`, `db_name`, `secret_arn`, `db_security_group_id` |
+| `s3-bucket` | Generic private bucket: KMS encryption at rest, versioning, public-access block, lifecycle rule, optional access logging | `bucket_name`, `versioning_enabled`, `access_log_bucket_id` | `bucket_id`, `bucket_arn` |
+| `ecs-fargate-service` | ECS cluster + Fargate task definition + service + ALB (own dedicated security groups) for one app; optional HTTPS listener, access logging, log-group KMS key | `name`, `image_url`, `container_port`, `vpc_id`, `public_subnet_ids`, `private_subnet_ids`, `execution_role_arn`, `task_role_arn`, `desired_count`, `certificate_arn` | `alb_dns_name`, `service_name`, `cluster_name`, `service_security_group_id` |
 
 ## 4. Requirements
 - R1: Every module MUST declare an explicit `required_providers` / `required_version` block (Terraform >= 1.5,

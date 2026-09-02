@@ -84,7 +84,31 @@ variable "secrets" {
 variable "log_retention_days" {
   description = "CloudWatch Logs retention for the service's log group."
   type        = number
-  default     = 30
+  default     = 400
+}
+
+variable "log_kms_key_id" {
+  description = "KMS key ARN to encrypt the CloudWatch log group with. Leave null to use CloudWatch's default encryption (no customer-managed key assumed)."
+  type        = string
+  default     = null
+}
+
+variable "certificate_arn" {
+  description = "ACM certificate ARN for HTTPS. When set, the ALB terminates TLS on :443 and redirects :80 to it. Leave null for plain HTTP (this capstone's local/dev environment has no domain or ACM certificate to attach)."
+  type        = string
+  default     = null
+}
+
+variable "access_logs_bucket_id" {
+  description = "S3 bucket ID to send ALB access logs to. Leave null to skip access logging (no target bucket assumed by default)."
+  type        = string
+  default     = null
+}
+
+variable "enable_deletion_protection" {
+  description = "Enable ALB deletion protection. Defaults to false so this dev environment can be cleanly `terraform destroy`ed; set true for any long-lived environment."
+  type        = bool
+  default     = false
 }
 
 variable "tags" {

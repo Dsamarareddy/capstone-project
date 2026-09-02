@@ -48,6 +48,12 @@ variable "multi_az" {
   default     = false
 }
 
+variable "deletion_protection" {
+  description = "Enable RDS deletion protection. Defaults to false so this dev environment can be cleanly `terraform destroy`ed; set true for any long-lived environment."
+  type        = bool
+  default     = false
+}
+
 variable "master_username" {
   description = "Master username for the instance."
   type        = string

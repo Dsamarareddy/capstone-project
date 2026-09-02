@@ -3,7 +3,9 @@
 Single PostgreSQL RDS instance in private subnets only, with an auto-generated master password stored in
 Secrets Manager (never a plaintext Terraform variable) — the execution role from `iam-app-role` is granted
 `secretsmanager:GetSecretValue` on this secret so the running container can fetch credentials at start time
-instead of them being baked into an image or task definition.
+instead of them being baked into an image or task definition. Also enables: automatic minor-version patching,
+Performance Insights, Enhanced Monitoring (its own IAM role), CloudWatch log exports
+(`postgresql`/`upgrade`), snapshot tag copying, and DDL query logging via a dedicated parameter group.
 
 ## Inputs
 | Name | Type | Default | Description |
@@ -16,9 +18,16 @@ instead of them being baked into an image or task definition.
 | `instance_class` | string | `db.t4g.micro` | Instance size |
 | `allocated_storage` | number | `20` | Storage in GiB |
 | `engine_version` | string | `16.4` | Postgres version |
-| `multi_az` | bool | `false` | Standby replica in a second AZ |
+| `multi_az` | bool | `false` | Standby replica in a second AZ (dev defaults false for cost) |
+| `deletion_protection` | bool | `false` | RDS deletion protection (off in dev for clean `terraform destroy`) |
 | `master_username` | string | `ims_admin` | Master username |
 | `tags` | map(string) | `{}` | Common tags |
+
+## Explicitly deferred (see inline `checkov:skip` comments in `main.tf`)
+IAM database authentication is not used — this module's credential story is a generated password in Secrets
+Manager instead, kept consistent with how ECS injects it as a task secret. Secret rotation (needs a custom
+Lambda) and a customer-managed KMS key for the secret are both documented as platform follow-ups rather than
+built here.
 
 ## Outputs
 | Name | Description |

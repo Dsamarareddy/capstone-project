@@ -21,8 +21,17 @@ inbound HTTP from `alb_ingress_cidr_blocks`; service SG allows inbound *only* fr
 | `execution_role_arn` / `task_role_arn` | string | — | From `iam-app-role` |
 | `environment` | map(string) | `{}` | Plain env vars |
 | `secrets` | map(string) | `{}` | `{ ENV_VAR = secretsmanager_arn }` injected as ECS secrets |
-| `log_retention_days` | number | `30` | CloudWatch Logs retention |
+| `log_retention_days` | number | `400` | CloudWatch Logs retention |
+| `log_kms_key_id` | string | `null` | CMK to encrypt the log group with; `null` uses CloudWatch's default |
+| `certificate_arn` | string | `null` | ACM cert ARN; when set, adds a real `:443` listener + HTTP→HTTPS redirect. `null` (this capstone's dev environment - no domain) keeps plain HTTP on `:80` |
+| `access_logs_bucket_id` | string | `null` | S3 bucket for ALB access logs; `null` skips logging |
+| `enable_deletion_protection` | bool | `false` | ALB deletion protection (kept off in dev for clean `terraform destroy`) |
 | `tags` | map(string) | `{}` | Common tags |
+
+## Explicitly deferred (see inline `checkov:skip` comments in `main.tf`)
+Attaching a WAF Web ACL is left to the calling environment (rule sets/rate limits are app-specific); the
+HTTPS listener, access logging, and log-group KMS key are all real, working features — just off by default
+because this capstone's dev environment has no domain, ACM certificate, or log bucket to point them at.
 
 ## Outputs
 | Name | Description |

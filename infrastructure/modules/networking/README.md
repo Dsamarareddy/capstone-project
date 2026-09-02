@@ -2,7 +2,9 @@
 
 Provisions a VPC with public + private subnets across N availability zones, an internet gateway, a single NAT
 gateway (dev-cost-optimized — see `docs/engineering-decisions/ADR-0001-cloud-and-compute-choice.md` for the
-single-NAT trade-off), route tables, and a default application security group.
+single-NAT trade-off), route tables, a locked-down default security group (no rules — every real workload
+gets its own dedicated SG from the module that owns it, e.g. `ecs-fargate-service` or `rds-postgres`), and
+VPC Flow Logs to CloudWatch.
 
 ## Inputs
 | Name | Type | Default | Description |
@@ -18,7 +20,6 @@ single-NAT trade-off), route tables, and a default application security group.
 | `vpc_id` | ID of the VPC |
 | `public_subnet_ids` | List of public subnet IDs |
 | `private_subnet_ids` | List of private subnet IDs |
-| `app_security_group_id` | ID of the default app security group |
 
 ## Example
 ```hcl

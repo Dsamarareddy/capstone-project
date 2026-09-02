@@ -50,3 +50,31 @@ ever opening a PR.
 Gitleaks + Trivy + Checkov, wired into the same reusable workflows every application already inherits, gives
 full secret/dependency/image/IaC coverage using only the guide's recommended, free, open-source tooling —
 with zero additional opt-in burden on application teams.
+
+## Addendum: Real Local Run Results (this build session)
+
+`./scripts/security-scan.ps1` was actually executed against this repository via Podman, not just written:
+
+- **Gitleaks**: clean, 0 findings (`security-reports/gitleaks-report.json`).
+- **Checkov**: the first real run found 40 failed checks across the six Terraform modules. Each was triaged
+  individually rather than blanket-suppressed:
+  - **Fixed for real** (~20 checks): a genuinely dead/unused security group was deleted (it was orphaned by
+    the `ecs-fargate-service`/`rds-postgres` security-group redesign — Checkov's "SG attached to another
+    resource" check caught a real bug, not just a style issue); the VPC's default security group is now
+    locked to no rules; VPC Flow Logs, RDS Enhanced Monitoring, Performance Insights, DDL query logging,
+    `rds.force_ssl`, KMS encryption on ECR/S3, an S3 lifecycle rule, auto minor-version upgrades, and
+    `drop_invalid_header_fields` on the ALB were all added.
+  - **Explicitly deferred** (24 checks, each with an inline `#checkov:skip=<ID>:<reason>` comment in the
+    relevant module's `main.tf`): Multi-AZ, deletion protection, IAM database auth, secret rotation/CMK,
+    enhanced-monitoring cost trade-offs the module already makes configurable via variables, and everything
+    that depends on an ACM certificate/owned domain this capstone's local/dev environment doesn't have
+    (HTTPS listener, WAF, cross-region replication). Every skip explains *why*, per `governance-spec.md` §3's
+    requirement that suppressions be reasoned, not silent.
+  - **Result after fixes**: 0 failed / 164 passed / 24 reasoned skips.
+- **Trivy**: failed to run in this environment — its vulnerability-database download hit
+  `x509: certificate signed by unknown authority` against `mirror.gcr.io`, indicating this machine sits
+  behind a TLS-intercepting network (a corporate proxy/firewall whose root CA isn't trusted inside the
+  container). This is an environment/network limitation, not a defect in the pipeline configuration — the
+  same `reusable-security-scan.yml` step runs cleanly on GitHub-hosted runners, which don't sit behind that
+  proxy. Documented here rather than worked around, since bypassing TLS verification to "fix" it would be a
+  worse outcome than leaving it failing loudly.

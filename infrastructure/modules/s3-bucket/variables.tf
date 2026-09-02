@@ -15,6 +15,12 @@ variable "force_destroy" {
   default     = false
 }
 
+variable "access_log_bucket_id" {
+  description = "Bucket ID to send S3 access logs to. Leave null to skip access logging (no target bucket assumed by default)."
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Common tags applied to the bucket."
   type        = map(string)
