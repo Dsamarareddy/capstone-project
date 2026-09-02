@@ -1,0 +1,108 @@
+openapi: 3.0.3
+info:
+  title: Inventory Management System API
+  version: 1.0.0
+  description: Reference application for the group1-advanced Internal Developer Platform capstone.
+servers:
+  - url: http://localhost:3000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  service: { type: string, example: ims }
+                  timestamp: { type: string, format: date-time }
+  /items:
+    get:
+      summary: List all inventory items
+      responses:
+        '200':
+          description: List of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Item' }
+    post:
+      summary: Create an inventory item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ItemInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Item' }
+        '400': { description: Invalid payload }
+        '409': { description: SKU already exists }
+  /items/{id}:
+    get:
+      summary: Get an inventory item by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Item found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Item' }
+        '404': { description: Item not found }
+    put:
+      summary: Update an inventory item
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ItemInput' }
+      responses:
+        '200': { description: Updated }
+        '400': { description: Invalid payload }
+        '404': { description: Item not found }
+        '409': { description: SKU already exists }
+    delete:
+      summary: Delete an inventory item
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: Deleted }
+        '404': { description: Item not found }
+components:
+  schemas:
+    ItemInput:
+      type: object
+      required: [sku, name, warehouseLocation]
+      properties:
+        sku: { type: string }
+        name: { type: string }
+        quantity: { type: integer, default: 0 }
+        warehouseLocation: { type: string }
+        reorderLevel: { type: integer, default: 0 }
+    Item:
+      allOf:
+        - $ref: '#/components/schemas/ItemInput'
+        - type: object
+          properties:
+            id: { type: integer }
+            updatedAt: { type: string, format: date-time }

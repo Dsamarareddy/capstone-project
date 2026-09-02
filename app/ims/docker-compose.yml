@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16.4-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ims
+      POSTGRES_PASSWORD: ims
+      POSTGRES_DB: ims
+    ports:
+      - "5432:5432"
+    volumes:
+      - ims-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ims -d ims"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: ims
+      PGPASSWORD: ims
+      PGDATABASE: ims
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  ims-db-data:
