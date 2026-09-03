@@ -87,11 +87,15 @@ Then, once Terraform/a container runtime is confirmed on PATH:
     a reasoned inline `#checkov:skip=<ID>:<reason>` comment each (ACM/WAF/cross-region-replication style
     items this capstone's no-domain dev environment can't satisfy, plus cost/complexity trade-offs already
     exposed as module variables). **Final result: 0 failed / 164 passed / 24 reasoned skips.**
-  - **Trivy**: failed to download its vulnerability DB — `x509: certificate signed by unknown authority`
-    against `mirror.gcr.io`, i.e. this machine sits behind a TLS-intercepting corporate network/proxy whose
-    root CA isn't trusted inside the container. This is an environment limitation, not a pipeline defect —
-    the same step runs cleanly on GitHub-hosted runners. Re-run `./scripts/security-scan.ps1` from a network
-    without TLS interception (or in CI) to get a real Trivy result.
+  - **Trivy**: failed to download its vulnerability DB via this script — `x509: certificate signed by
+    unknown authority` against `mirror.gcr.io`, i.e. this machine sits behind a TLS-intercepting corporate
+    network/proxy whose root CA isn't trusted inside the container. GitHub-hosted runners don't sit behind
+    that proxy, so once this repo was actually pushed to GitHub, Trivy ran for real in CI and found two
+    rounds of genuine CVEs — both fixed (see `ADR-0004` addendum for the full breakdown): a transitive `qs`
+    dependency (fixed via an npm `overrides` entry) and 13 CRITICAL/HIGH findings in the container image
+    (npm's own bundled deps + unpatchable Debian OS packages, fixed by stripping npm from the runtime stage
+    and switching the base image to `node:20.20.2-alpine`). Re-scanned locally with Trivy's `--insecure` flag
+    to confirm: **0 CRITICAL/HIGH findings**, down from 13.
 - 🔜 `terraform validate` — Terraform wasn't resolvable on this machine's PATH by the end of this session
   (the download appears not to have been extracted to the folder already added to PATH); re-run
   `./scripts/validate-terraform.ps1` once `terraform --version` works.

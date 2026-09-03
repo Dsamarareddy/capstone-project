@@ -71,10 +71,24 @@ with zero additional opt-in burden on application teams.
     (HTTPS listener, WAF, cross-region replication). Every skip explains *why*, per `governance-spec.md` §3's
     requirement that suppressions be reasoned, not silent.
   - **Result after fixes**: 0 failed / 164 passed / 24 reasoned skips.
-- **Trivy**: failed to run in this environment — its vulnerability-database download hit
-  `x509: certificate signed by unknown authority` against `mirror.gcr.io`, indicating this machine sits
-  behind a TLS-intercepting network (a corporate proxy/firewall whose root CA isn't trusted inside the
-  container). This is an environment/network limitation, not a defect in the pipeline configuration — the
-  same `reusable-security-scan.yml` step runs cleanly on GitHub-hosted runners, which don't sit behind that
-  proxy. Documented here rather than worked around, since bypassing TLS verification to "fix" it would be a
-  worse outcome than leaving it failing loudly.
+- **Trivy**: failed to run against this repo's own local Podman initially — its vulnerability-database
+  download hit `x509: certificate signed by unknown authority` against `mirror.gcr.io`, indicating this
+  machine sits behind a TLS-intercepting network (a corporate proxy/firewall whose root CA isn't trusted
+  inside the container). GitHub-hosted runners don't sit behind that proxy, so `reusable-security-scan.yml`
+  ran there for real once this repo was pushed to GitHub, and found two rounds of genuine findings, both
+  fixed:
+  - **Filesystem scan**: `qs@6.15.3` (pulled in transitively via `express` → `body-parser`), vulnerable to
+    GHSA-x5fp-wj9c-mxmx and GHSA-4mjr-xmp4-gh2g. A plain `npm audit fix` couldn't reach it without a major
+    Express bump, so fixed via an npm `overrides` entry pinning `qs@6.16.0`. `npm audit`: 0 vulnerabilities;
+    all 8 Jest tests still pass.
+  - **Image scan**: 13 CRITICAL/HIGH findings — npm's own bundled dependencies (`tar`, `minimatch`, `glob`,
+    `cross-spawn`, `pacote`, `sigstore`) inside the stale `node:20.17.0-bookworm-slim` base image, plus
+    Debian OS packages (`perl-base`, `zlib1g`, `util-linux`, `ncurses`), several marked `will_not_fix` /
+    `affected` by Debian itself with no patch available at all. Fixed by (1) deleting npm/npx/corepack from
+    the final runtime stage — it only ever runs `node`, never `npm`, so this eliminates that CVE source
+    entirely rather than chasing it per base-image bump — and (2) switching the base image to
+    `node:20.20.2-alpine` (the app has zero native dependencies, verified with a real `podman build` + run +
+    live `/health` check against Postgres), which drops the whole Debian package set those CVEs lived in,
+    plus an `apk upgrade` at build time to pick up an OpenSSL patch newer than the base image's pinned
+    snapshot. Re-scanned locally (using Trivy's `--insecure` flag as a one-off diagnostic workaround for this
+    network's TLS interception, not a permanent CI change): **0 CRITICAL/HIGH findings**, down from 13.
