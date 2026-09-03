@@ -30,8 +30,12 @@ Steps: checkout → setup-node with npm cache → `npm ci` → `npm run lint` �
 Inputs: `app_dir`, `image_name`, `terraform_dir` (optional).
 Steps:
 - Gitleaks over the full checkout (secret scanning) — fails the job on any finding.
-- Trivy filesystem scan over `app_dir` (dependency vulnerabilities) — fails on CRITICAL/HIGH.
-- Trivy image scan over the image built by `reusable-ci.yml` — fails on CRITICAL/HIGH.
+- Trivy filesystem scan over `app_dir` (dependency vulnerabilities) — fails on CRITICAL/HIGH. Each scan runs
+  twice: once as a human-readable table printed to the job log (`exit-code: 0`, for at-a-glance triage) and
+  once producing the enforced SARIF artifact (`exit-code: 1`, the actual gate) — so a failed run is
+  self-explanatory from the log alone, not just a bare non-zero exit.
+- Trivy image scan over the image built by `reusable-ci.yml` — fails on CRITICAL/HIGH, same table+SARIF
+  pattern as the filesystem scan above.
 - Checkov over `terraform_dir` when provided — fails on HIGH/CRITICAL misconfigurations.
 - All results uploaded as SARIF artifacts for review.
 
