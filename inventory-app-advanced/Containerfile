@@ -1,0 +1,21 @@
+# ---- Stage 1: install dependencies and run the tests ----
+FROM python:3.12-slim AS build
+WORKDIR /src
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+COPY . .
+RUN PYTHONPATH=/install/lib/python3.12/site-packages python -m pytest -q
+
+# ---- Stage 2: small runtime image ----
+FROM python:3.12-slim
+ENV PYTHONUNBUFFERED=1 DATABASE_URL=sqlite:////data/inventory.db
+RUN useradd -m appuser && mkdir /data && chown appuser /data
+COPY --from=build /install /usr/local
+WORKDIR /app
+COPY app ./app
+COPY wsgi.py .
+USER appuser
+VOLUME /data
+EXPOSE 5000
+HEALTHCHECK --interval=30s --timeout=3s CMD python -c "import urllib.request;urllib.request.urlopen('http://localhost:5000/health')"
+CMD ["gunicorn", "-w", "1", "--threads", "4","-b", "0.0.0.0:5000", "--access-logfile", "-", "wsgi:app"]

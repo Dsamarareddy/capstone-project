@@ -44,3 +44,10 @@ Thumbs.db
 # Presentation exports (generated, not source)
 presentation/*.pptx
 presentation/*.pdf
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.db
+.venv/

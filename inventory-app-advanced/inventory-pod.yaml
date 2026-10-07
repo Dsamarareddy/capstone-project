@@ -1,0 +1,22 @@
+# Run with:  podman kube play inventory-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: inventory-pod
+spec:
+  containers:
+    - name: inventory
+      image: localhost/inventory-advanced:latest
+      ports:
+        - containerPort: 5000
+          hostPort: 8080
+      env:
+        - name: API_KEY
+          value: demo-key
+      volumeMounts:
+        - name: inventory-data
+          mountPath: /data
+  volumes:
+    - name: inventory-data
+      persistentVolumeClaim:
+        claimName: inventory-data
