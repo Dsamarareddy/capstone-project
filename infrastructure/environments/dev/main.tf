@@ -65,8 +65,14 @@ module "ims_service" {
   environment = {
     PORT = tostring(var.container_port)
   }
+  # Map each JSON key of the RDS secret onto the PG* variables the app reads
+  # (Secrets Manager "<arn>:<json-key>::" syntax).
   secrets = {
-    DATABASE_SECRET_ARN = module.db.secret_arn
+    PGHOST     = "${module.db.secret_arn}:host::"
+    PGPORT     = "${module.db.secret_arn}:port::"
+    PGUSER     = "${module.db.secret_arn}:username::"
+    PGPASSWORD = "${module.db.secret_arn}:password::"
+    PGDATABASE = "${module.db.secret_arn}:dbname::"
   }
   tags = local.tags
 }

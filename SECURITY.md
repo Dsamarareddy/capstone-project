@@ -18,7 +18,7 @@ by `reusable-security-scan.yml`:
 | Container image vulnerabilities | Trivy (image mode) | CRITICAL/HIGH CVEs in the built image |
 | Infrastructure misconfiguration | Checkov | HIGH/CRITICAL Terraform misconfigurations |
 
-Run the same checks locally before opening a PR with `./scripts/security-scan.ps1`.
+Run the same checks locally before opening a PR with `python scripts/idp.py scan` (or `./scripts/security-scan.ps1`).
 
 ## Reporting a Vulnerability
 

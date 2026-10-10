@@ -1,108 +1,194 @@
 openapi: 3.0.3
 info:
   title: Inventory Management System API
-  version: 1.0.0
-  description: Reference application for the group1-advanced Internal Developer Platform capstone.
+  version: 2.0.0
+  description: >
+    Reference application for the group1-advanced Internal Developer Platform capstone - product
+    inventory, shopping cart and checkout. Write operations on products require the X-API-Key header.
 servers:
   - url: http://localhost:3000
-paths:
-  /health:
-    get:
-      summary: Health check
-      responses:
-        '200':
-          description: Service is healthy
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string, example: ok }
-                  service: { type: string, example: ims }
-                  timestamp: { type: string, format: date-time }
-  /items:
-    get:
-      summary: List all inventory items
-      responses:
-        '200':
-          description: List of items
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/Item' }
-    post:
-      summary: Create an inventory item
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/ItemInput' }
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Item' }
-        '400': { description: Invalid payload }
-        '409': { description: SKU already exists }
-  /items/{id}:
-    get:
-      summary: Get an inventory item by id
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: integer }
-      responses:
-        '200':
-          description: Item found
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Item' }
-        '404': { description: Item not found }
-    put:
-      summary: Update an inventory item
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: integer }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/ItemInput' }
-      responses:
-        '200': { description: Updated }
-        '400': { description: Invalid payload }
-        '404': { description: Item not found }
-        '409': { description: SKU already exists }
-    delete:
-      summary: Delete an inventory item
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: integer }
-      responses:
-        '204': { description: Deleted }
-        '404': { description: Item not found }
 components:
+  securitySchemes:
+    ApiKey: { type: apiKey, in: header, name: X-API-Key }
+  parameters:
+    Id: { in: path, name: id, required: true, schema: { type: integer } }
   schemas:
-    ItemInput:
+    ProductInput:
       type: object
-      required: [sku, name, warehouseLocation]
+      required: [sku, name, quantity, price]
       properties:
-        sku: { type: string }
-        name: { type: string }
-        quantity: { type: integer, default: 0 }
-        warehouseLocation: { type: string }
-        reorderLevel: { type: integer, default: 0 }
-    Item:
+        sku: { type: string, minLength: 2, maxLength: 40 }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        category: { type: string, maxLength: 60, default: General }
+        quantity: { type: integer, minimum: 0 }
+        price: { type: number, minimum: 0 }
+    Product:
       allOf:
-        - $ref: '#/components/schemas/ItemInput'
+        - $ref: '#/components/schemas/ProductInput'
         - type: object
           properties:
             id: { type: integer }
-            updatedAt: { type: string, format: date-time }
+            in_stock: { type: boolean }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+    ProductPage:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/Product' } }
+        page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+        pages: { type: integer }
+    CartItem:
+      type: object
+      properties:
+        id: { type: integer }
+        product_id: { type: integer }
+        name: { type: string }
+        unit_price: { type: number }
+        quantity: { type: integer }
+        line_total: { type: number }
+    Cart:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/CartItem' } }
+        total: { type: number }
+    Order:
+      type: object
+      properties:
+        id: { type: integer }
+        total: { type: number }
+        items: { type: array, items: { $ref: '#/components/schemas/CartItem' } }
+        created_at: { type: string, format: date-time }
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        message: { type: string }
+paths:
+  /health:
+    get:
+      summary: Health check (also verifies database connectivity)
+      responses:
+        '200': { description: Healthy }
+  /:
+    get:
+      summary: Web UI
+      responses:
+        '200': { description: HTML page }
+  /api/v1/products:
+    get:
+      summary: List products (search, filter, sort, paginate)
+      parameters:
+        - { in: query, name: search, schema: { type: string }, description: Match on name or SKU }
+        - { in: query, name: category, schema: { type: string } }
+        - { in: query, name: in_stock, schema: { type: string, enum: ['true'] } }
+        - { in: query, name: sort, schema: { type: string, example: -price }, description: 'id|name|price|quantity|category|created_at, prefix - for desc' }
+        - { in: query, name: page, schema: { type: integer, default: 1 } }
+        - { in: query, name: per_page, schema: { type: integer, default: 10, maximum: 100 } }
+      responses:
+        '200': { description: Page of products, content: { application/json: { schema: { $ref: '#/components/schemas/ProductPage' } } } }
+        '400': { description: Invalid sort field }
+    post:
+      summary: Create a product
+      security: [{ ApiKey: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ProductInput' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Product' } } } }
+        '400': { description: Validation failed }
+        '401': { description: Missing or invalid API key }
+        '409': { description: SKU already exists }
+  /api/v1/products/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      summary: Get a product
+      responses:
+        '200': { description: Found, content: { application/json: { schema: { $ref: '#/components/schemas/Product' } } } }
+        '404': { description: Not found }
+    put:
+      summary: Replace a product
+      security: [{ ApiKey: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ProductInput' } } } }
+      responses:
+        '200': { description: Updated }
+        '400': { description: Validation failed }
+        '401': { description: Missing or invalid API key }
+        '404': { description: Not found }
+        '409': { description: SKU already exists }
+    patch:
+      summary: Partially update a product
+      security: [{ ApiKey: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ProductInput' } } } }
+      responses:
+        '200': { description: Updated }
+        '400': { description: Validation failed }
+        '401': { description: Missing or invalid API key }
+        '404': { description: Not found }
+        '409': { description: SKU already exists }
+    delete:
+      summary: Delete a product
+      security: [{ ApiKey: [] }]
+      responses:
+        '204': { description: Deleted }
+        '401': { description: Missing or invalid API key }
+        '404': { description: Not found }
+  /api/v1/stats:
+    get:
+      summary: Inventory totals, value, low-stock items and order count
+      responses:
+        '200': { description: Stats }
+  /api/v1/cart:
+    get:
+      summary: Get the cart
+      responses:
+        '200': { description: Cart, content: { application/json: { schema: { $ref: '#/components/schemas/Cart' } } } }
+    post:
+      summary: Add a product to the cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product_id]
+              properties:
+                product_id: { type: integer }
+                quantity: { type: integer, minimum: 1, default: 1 }
+      responses:
+        '201': { description: Updated cart, content: { application/json: { schema: { $ref: '#/components/schemas/Cart' } } } }
+        '404': { description: Product not found }
+        '409': { description: Not enough stock }
+    delete:
+      summary: Clear the cart
+      responses:
+        '200': { description: Empty cart }
+  /api/v1/cart/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    put:
+      summary: Change a cart line's quantity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [quantity], properties: { quantity: { type: integer, minimum: 1 } } }
+      responses:
+        '200': { description: Updated cart }
+        '404': { description: Cart item not found }
+        '409': { description: Not enough stock }
+    delete:
+      summary: Remove a cart line
+      responses:
+        '200': { description: Updated cart }
+        '404': { description: Cart item not found }
+  /api/v1/cart/checkout:
+    post:
+      summary: Place an order from the cart and decrement stock
+      responses:
+        '201': { description: Order placed, content: { application/json: { schema: { $ref: '#/components/schemas/Order' } } } }
+        '400': { description: Cart is empty }
+        '409': { description: Not enough stock }
+  /api/v1/orders:
+    get:
+      summary: List orders, newest first
+      responses:
+        '200': { description: Orders, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Order' } } } } }

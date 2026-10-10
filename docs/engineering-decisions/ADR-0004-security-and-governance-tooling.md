@@ -92,3 +92,8 @@ with zero additional opt-in burden on application teams.
     plus an `apk upgrade` at build time to pick up an OpenSSL patch newer than the base image's pinned
     snapshot. Re-scanned locally (using Trivy's `--insecure` flag as a one-off diagnostic workaround for this
     network's TLS interception, not a permanent CI change): **0 CRITICAL/HIGH findings**, down from 13.
+
+> **Update (2026-10-10):** IMS and the service template were since migrated from Node.js/Express to
+> Python/Flask (gunicorn on `python:3.12-alpine`). The npm-specific findings above are historical; the same
+> mitigation pattern carries over — the runtime image strips `pip`/`setuptools`/`wheel`, as it previously
+> stripped npm, and dependencies are pinned in `requirements.txt` for Trivy to scan.

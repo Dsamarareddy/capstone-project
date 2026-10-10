@@ -23,6 +23,7 @@ services:
     restart: unless-stopped
     environment:
       PORT: 3000
+      API_KEY: demo-key
       PGHOST: db
       PGPORT: 5432
       PGUSER: ims

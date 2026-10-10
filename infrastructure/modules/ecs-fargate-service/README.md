@@ -52,7 +52,7 @@ module "ims_service" {
   private_subnet_ids  = module.networking.private_subnet_ids
   execution_role_arn  = module.iam.execution_role_arn
   task_role_arn       = module.iam.task_role_arn
-  secrets             = { DATABASE_SECRET_ARN = module.db.secret_arn }
+  secrets             = { PGHOST = "${module.db.secret_arn}:host::", PGPASSWORD = "${module.db.secret_arn}:password::" } # + PGPORT/PGUSER/PGDATABASE
   tags                = { Environment = "dev", Application = "ims", ManagedBy = "terraform" }
 }
 ```

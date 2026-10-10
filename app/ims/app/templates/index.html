@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>StockFlow — Inventory Management</title>
+<title>Inventory Management System</title>
+<link rel="icon" type="image/png" href="/static/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -19,7 +20,8 @@ button{font:inherit;cursor:pointer}
 /* Sidebar */
 aside{background:var(--side);color:#cbd5e1;padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
 .brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:18px;padding:0 10px 26px}
-.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#22d3ee);display:grid;place-items:center}
+.brand-name{line-height:1.2}.brand-name small{display:block;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-top:2px}
+.logo{flex:none;width:40px;height:40px;border-radius:50%;background:#fff;object-fit:cover;box-shadow:0 0 0 2px rgba(255,255,255,.12)}
 nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-weight:500;margin-bottom:4px}
 nav a:hover{background:#1e293b;color:#fff}
 nav a.active{background:#1e293b;color:#fff;box-shadow:inset 3px 0 0 #6366f1}
@@ -120,14 +122,14 @@ tr:hover td{background:#fafbff}
 <body>
 <div class="layout">
 <aside>
-  <div class="brand"><div class="logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div>StockFlow</div>
+  <div class="brand"><img class="logo" src="/static/logo.png" alt="Inventory Management System logo"><div class="brand-name">Inventory Management<small>System</small></div></div>
   <nav>
     <a href="#" data-view="dashboard" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
     <a href="#" data-view="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>Products</a>
     <a href="#" data-view="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5h10M9 12h10M9 19h10M5 5h.01M5 12h.01M5 19h.01"/></svg>Orders</a>
     <a href="#" onclick="openCart();return false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 002 1.6h8.6a2 2 0 002-1.6L22 7H6"/></svg>Cart</a>
   </nav>
-  <div class="side-foot"><span class="dot"></span><span id="sys">System healthy</span><br><span style="margin-left:14px">API v1 · Podman</span></div>
+  <div class="side-foot"><span class="dot"></span><span id="sys">System healthy</span><br><span style="margin-left:14px">API v1</span></div>
 </aside>
 
 <div>

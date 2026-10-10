@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json.bak
 
 # Environment / secrets
 .env
@@ -27,7 +26,6 @@ dist/
 build/
 coverage/
 *.log
-npm-debug.log*
 
 # Security scan reports (generated locally, not committed)
 security-reports/
@@ -41,9 +39,6 @@ Thumbs.db
 # Local AI coding assistant tool state (not project content)
 .claude/
 
-# Presentation exports (generated, not source)
-presentation/*.pptx
-presentation/*.pdf
 
 # Python
 __pycache__/
@@ -51,3 +46,4 @@ __pycache__/
 .pytest_cache/
 *.db
 .venv/
+.ruff_cache/

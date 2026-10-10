@@ -1,26 +1,29 @@
 # Presentation
 
-`capstone-presentation.md` is a [Marp](https://marp.app/) slide deck (plain Markdown with a `marp: true`
-front-matter block). Its 8-slide structure (Title → Problem Statement → Solution → CI/CD Pipeline diagram →
-AWS Architecture diagram → Security table → Validation table → Thank You) mirrors the format of a reference
-submission (`Group21_Foundation.pptx`) another group produced, restyled with this platform's own content and
-the real validation results/logs captured during this build (see the Validation slide).
+| File | What it is |
+|---|---|
+| `group1-advanced-capstone.pptx` | Final capstone deck (15 slides, editable in PowerPoint) |
+| `group1-advanced-capstone.pdf` | PDF export of the same deck, for sharing and offline review |
 
-Exported files are gitignored (see root `.gitignore`) since they're generated output, not source. The
-current submission copy is exported directly to Downloads, not into this folder:
-`C:\Users\samarashima.reddy\Downloads\Group1_Advanced.pptx` / `.pdf`.
+## Slide outline
 
-## Re-export after editing the deck
+| # | Section | Slide |
+|---|---|---|
+| 1 | Introduction | Title: Inventory Management System — Internal Developer Platform |
+| 2 | Introduction | Six business problems (from the capstone brief) |
+| 3 | Introduction | Spec-first, AI-assisted engineering workflow |
+| 4 | Platform | Six reusable building blocks |
+| 5 | Platform | Platform architecture: build once, reuse everywhere |
+| 6 | Reference application | The IMS app: features and request path |
+| 7 | Delivery & security | Reusable CI/CD pipeline and security gates |
+| 8 | Delivery & security | AWS target architecture from shared Terraform modules |
+| 9 | Delivery & security | DevSecOps controls by layer |
+| 10 | Developer experience | `idp` self-service CLI |
+| 11 | Developer experience | Onboarding before vs. with the platform |
+| 12 | Specs & decisions | The six AI Engineering Specifications |
+| 13 | Specs & decisions | Key engineering decisions (ADR-0001 … ADR-0004) |
+| 14 | Results | Validation results, including what is still pending |
+| 15 | Results | Thank you and next steps |
 
-```powershell
-npx --yes @marp-team/marp-cli@latest capstone-presentation.md --pptx --allow-local-files -o "C:\Users\samarashima.reddy\Downloads\Group1_Advanced.pptx"
-npx --yes @marp-team/marp-cli@latest capstone-presentation.md --pdf --allow-local-files -o "C:\Users\samarashima.reddy\Downloads\Group1_Advanced.pdf"
-```
-
-The first run downloads a headless Chrome via Puppeteer (requires internet access once); subsequent runs
-reuse the cached browser.
-
-## If `npx`/Chrome isn't available
-
-Open `capstone-presentation.md` directly — any Markdown viewer renders it as readable slide-shaped sections,
-or paste each `---`-delimited section into PowerPoint manually as one slide per section.
+Every number on the Validation slide comes from a real run; see "What was validated" in the root
+[`README.md`](../README.md).

@@ -16,7 +16,7 @@ jobs:
     uses: <org>/group1-advanced/.github/workflows/reusable-ci.yml@main
     with:
       app_dir: app # TODO(new-service): change if your app lives elsewhere
-      node_version: "20"
+      python_version: "3.12"
       image_name: TODO-service-name # TODO(new-service): set to your service name
 
   security-scan:

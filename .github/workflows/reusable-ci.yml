@@ -7,11 +7,11 @@ on:
         description: "Path to the application directory (e.g. app/ims)"
         required: true
         type: string
-      node_version:
-        description: "Node.js version to use"
+      python_version:
+        description: "Python version to use"
         required: false
         type: string
-        default: "20"
+        default: "3.12"
       image_name:
         description: "Docker image name to tag the built image with"
         required: true
@@ -31,21 +31,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          node-version: ${{ inputs.node_version }}
-          cache: npm
-          cache-dependency-path: ${{ inputs.app_dir }}/package-lock.json
+          python-version: ${{ inputs.python_version }}
+          cache: pip
+          cache-dependency-path: ${{ inputs.app_dir }}/requirements*.txt
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          else
+            pip install -r requirements.txt pytest ruff
+          fi
 
       - name: Lint
-        run: npm run lint --if-present
+        run: ruff check .
 
       - name: Test
-        run: npm test
+        run: python -m pytest -q
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

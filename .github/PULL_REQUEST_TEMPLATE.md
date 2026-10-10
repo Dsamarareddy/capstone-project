@@ -8,7 +8,7 @@
 
 ## How was this tested?
 
-<!-- e.g. `npm test`, `./scripts/security-scan.ps1`, `./scripts/validate-terraform.ps1`, manual docker compose run -->
+<!-- e.g. `python scripts/idp.py ci`, `python scripts/idp.py scan`, `python scripts/idp.py tf-validate`, manual docker compose run -->
 
 ## Security-sensitive surfaces touched?
 

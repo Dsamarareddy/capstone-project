@@ -1,7 +1,7 @@
 # Service Repository Template
 
 Starting point for any new application team onboarding onto the group1-advanced Internal Developer Platform.
-Copy this directory (or run `scripts/new-service.ps1 -Name <your-service>` from the platform repo root) into
+Copy this directory (or run `python scripts/idp.py new-service <your-service>` from the platform repo root) into
 a new repository and follow the checklist below. See `docs/ai-specifications/repo-template-spec.md` in the
 platform repo for the full specification this template implements.
 
@@ -25,8 +25,9 @@ platform repo for the full specification this template implements.
 ## Run locally
 ```powershell
 cd app
-npm install
-npm start        # serves /health on :3000 immediately, before you've written any real routes
+pip install -r requirements-dev.txt
+python -m service.app   # serves /health on :3000 immediately, before you've written any real routes
+python -m pytest -q     # or, from the platform repo: python scripts/idp.py ci --app <path-to-app>
 ```
 
 Every file you're expected to edit is marked with a `# TODO(new-service):` comment.

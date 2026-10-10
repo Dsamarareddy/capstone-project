@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Linux/macOS wrapper for the self-service platform CLI (scripts/idp.py).
+#   ./scripts/idp new-service billing-service
+exec python3 "$(dirname "$0")/idp.py" "$@"

@@ -21,7 +21,7 @@ defines exactly what must and must not be customized during onboarding.
   cannot assume exists ("cloud infrastructure may not be provided"). Rejected for this submission's scope,
   though `platform-spec.md` §3 notes it as an explicit non-goal rather than an oversight.
 - **`degit`/`cookiecutter`-style external templating tool**: adds a dependency not in the guide's recommended
-  stack; a PowerShell script using the tools already present (Node.js, filesystem copy) was preferred for
+  stack; a PowerShell script using the tools already present (filesystem copy; now the Python `scripts/idp.py new-service`) was preferred for
   zero additional install burden matching the "Provided/Recommended Tools" list.
 - **A GitHub "template repository" (native GitHub feature)**: viable once this platform actually lives on
   GitHub as its own repo — noted as the natural next step once `<org>/group1-advanced` exists (see the

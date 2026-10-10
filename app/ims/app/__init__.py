@@ -1,5 +1,6 @@
 import logging
 import os
+import tempfile
 
 from flask import Flask, jsonify, render_template
 from werkzeug.exceptions import HTTPException
@@ -7,10 +8,27 @@ from werkzeug.exceptions import HTTPException
 from .models import db
 
 
+def database_url_from_env():
+    """DATABASE_URL wins; otherwise PG* vars (as injected by docker-compose / ECS) select Postgres;
+    with neither, fall back to a SQLite file in the temp dir (writable by the non-root container user)."""
+    if os.getenv("DATABASE_URL"):
+        return os.environ["DATABASE_URL"]
+    if os.getenv("PGHOST"):
+        return "postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}".format(
+            user=os.getenv("PGUSER", "ims"),
+            password=os.getenv("PGPASSWORD", "ims"),
+            host=os.environ["PGHOST"],
+            port=int(os.getenv("PGPORT", "5432")),
+            db=os.getenv("PGDATABASE", "ims"),
+        )
+    return "sqlite:///" + os.path.join(tempfile.gettempdir(), "inventory.db")
+
+
 def create_app(config=None):
     app = Flask(__name__)
     app.config.update(
-        SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL", "sqlite:////data/inventory.db"),
+        SQLALCHEMY_DATABASE_URI=database_url_from_env(),
+        SQLALCHEMY_ENGINE_OPTIONS={"pool_pre_ping": True},
         API_KEY=os.getenv("API_KEY", "demo-key"),
         JSON_SORT_KEYS=False,
     )
